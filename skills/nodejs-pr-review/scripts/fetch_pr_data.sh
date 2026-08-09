@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-# Read-only fetch of GitHub PR data for review reports. GET requests only;
-# nothing is written back to GitHub.
+# 只读抓取 GitHub PR 数据用于审查报告。仅发 GET 请求，不会向 GitHub 写任何内容。
 #
-# Usage:
+# 用法：
 #   fetch_pr_data.sh [--repo nodejs/node] [--count 10] [--state open]
 #                    [--out data] [--api BASE_URL]
 #
-# BASE_URL examples:
-#   https://api.github.com                                (public, rate-limited)
-#   https://api.sprites.dev/v1/gateway/github/<conn-id>   (Sprite API gateway)
+# BASE_URL 示例：
+#   https://api.github.com                                （公共 API，有限流）
+#   https://api.sprites.dev/v1/gateway/github/<conn-id>   （Sprite API 网关）
 
 set -euo pipefail
 
@@ -25,7 +24,7 @@ while [[ $# -gt 0 ]]; do
     --state) STATE="$2"; shift 2 ;;
     --out) OUT="$2"; shift 2 ;;
     --api) API="$2"; shift 2 ;;
-    *) echo "unknown option: $1" >&2; exit 2 ;;
+    *) echo "未知选项：$1" >&2; exit 2 ;;
   esac
 done
 
@@ -37,7 +36,7 @@ curl -fsSL --max-time 30 \
   -o "$LIST"
 
 if ! jq -e 'type == "array" and length > 0' "$LIST" >/dev/null; then
-  echo "No PRs fetched; check --api/--repo or API rate limits." >&2
+  echo "没有抓到 PR；请检查 --api/--repo 或 API 限流。" >&2
   jq '.' "$LIST" 2>/dev/null | head -20 >&2 || true
   exit 1
 fi
@@ -53,7 +52,7 @@ for n in "${NUMBERS[@]}"; do
   curl -fsSL --max-time 30 "$API/repos/$REPO/pulls/$n/commits?per_page=100" -o "$OUT/pr_${n}_commits.json"
   SHA=$(jq -r '.head.sha' "$OUT/pr_$n.json")
   curl -fsSL --max-time 30 "$API/repos/$REPO/commits/$SHA/check-runs?per_page=100" -o "$OUT/pr_${n}_checks.json"
-  echo "fetched PR $n"
+  echo "已抓取 PR $n"
 done
 
-echo "done: $(jq 'length' "$LIST") PRs in $OUT"
+echo "完成：$OUT 中共 $(jq 'length' "$LIST") 个 PR"

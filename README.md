@@ -1,3 +1,3 @@
 # Personal Dev Skills
 
-- skills/nodejs-pr-review: review nodejs/node PRs (read-only) and generate beginner-friendly HTML reports
+- skills/nodejs-pr-review：审查 nodejs/node PR（只读）并生成面向初学者的 HTML 报告
