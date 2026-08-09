@@ -1,0 +1,4 @@
+interface:
+  display_name: "Node.js PR Review"
+  short_description: "Review nodejs/node PRs and produce beginner HTML reports"
+  default_prompt: "Use $nodejs-pr-review to review the latest 10 open PRs in nodejs/node and build an HTML report."
