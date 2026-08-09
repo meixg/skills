@@ -1,0 +1,4 @@
+interface:
+  display_name: "Node.js PR 审查"
+  short_description: "审查 nodejs/node PR 并生成初学者 HTML 报告"
+  default_prompt: "使用 $nodejs-pr-review 审查 nodejs/node 最新的 10 个 PR，并生成 HTML 报告。"
