@@ -1,0 +1,7 @@
+interface:
+  display_name: "Weekly Writing"
+  short_description: "Create source-faithful Platform Eng weekly reports"
+  default_prompt: "Use $weekly-writing to generate the latest Platform Eng weekly from the TikTok Agency Eng&QA weekly."
+
+policy:
+  allow_implicit_invocation: true
