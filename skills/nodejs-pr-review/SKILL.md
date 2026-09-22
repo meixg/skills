@@ -19,8 +19,8 @@ description: 审查 nodejs/node（或其他 GitHub 仓库）的 Pull Request，�
    ```bash
    scripts/generate_report.js --data data --reviews reviews.json --out .
    ```
-   生成 `index.html` 与 `pr-<N>.html`（内联 SVG 图表，无需联网），并把 `assets/style.css` 复制到 `out/assets/`。
-6. **校验。** 打开 `index.html`，确认每个 `pr-<N>.html` 存在、内部链接可点、HTML 无未闭合标签；GitHub PR 地址和 `#NNNN` 引用必须渲染为可点击链接。
+   生成 `index.html` 与 `pr-<N>.html`。样式读取 `assets/style.css` 并内联为 `<style>` 块，图表用内联 SVG，每个页面单文件自包含、零外部请求，不产生 `assets/` 目录。
+6. **校验。** 打开 `index.html`，确认每个 `pr-<N>.html` 存在、内部链接可点、HTML 无未闭合标签；GitHub PR 地址和 `#NNNN` 引用必须渲染为可点击链接。同时确认页面无 `<link rel="stylesheet">` 等外部资源引用（必须全部内联）。
 
 ## 规则
 
@@ -31,10 +31,11 @@ description: 审查 nodejs/node（或其他 GitHub 仓库）的 Pull Request，�
 - 每个 PR 页面面向 Node.js core 初学者：包含大白话解释、关键改动、文件、发现、CI 状态和简短小词典。
 - 每条发现都要有证据（文件/行号/行为）。重构删代码时，必须对比基线版本语义后再下“等价”结论。
 - 报告每个 PR 的 CI 状态（成功/失败/进行中/跳过），CI 红灯应影响结论。
+- **报告 HTML 必须单文件自包含**：CSS 内联（`<style>`）、图表内联 SVG、不引用任何外部资源，禁止改回 `<link rel="stylesheet">`。原因：沙箱预览环境（如 paseo 文件预览）在 srcdoc iframe 中渲染并施加严格 CSP（`style-src 'unsafe-inline'`），外部样式表会被拦截，且 srcdoc 相对路径无法解析到本地目录。
 
 ## 资源
 
 - `references/review_guide.md` — 分类审查清单（src-core / sqlite / deps / test-WPT）、常见回归模式、结论与严重度口径、`reviews.json` 结构。写发现前先读它。
 - `scripts/fetch_pr_data.sh` — 只读 GitHub 数据抓取脚本。
 - `scripts/generate_report.js` — HTML 报告生成器（内联 SVG 图表）。
-- `assets/style.css` — 报告样式，复制到输出目录。
+- `assets/style.css` — 报告样式源文件，生成时内联进每个页面（不复制到输出目录）。
