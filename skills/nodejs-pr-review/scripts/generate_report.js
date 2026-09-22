@@ -15,6 +15,19 @@ const REVIEWS_FILE = arg('--reviews', path.join(SKILL_DIR, 'reviews.json'));
 const OUT = arg('--out', SKILL_DIR);
 const ASSET_SRC = path.join(SKILL_DIR, '..', 'assets', 'style.css');
 
+// Inline the CSS into every generated page so each one is self-contained.
+// Sandboxed HTML preview environments (e.g. paseo file preview) render files in
+// a srcdoc iframe with a strict CSP (`style-src 'unsafe-inline'`), which blocks
+// external stylesheets loaded via <link> — inline <style> is the only way.
+function loadCss() {
+  if (!fs.existsSync(ASSET_SRC)) {
+    throw new Error(`样式文件不存在: ${ASSET_SRC}`);
+  }
+  // Escape any literal </style so the inline block cannot terminate early.
+  return fs.readFileSync(ASSET_SRC, 'utf8').replace(/<\/(style)/gi, '<\\/$1');
+}
+const INLINE_CSS = loadCss();
+
 const VERDICT_COLORS = {
   'approve': '#1f9d55',
   'approve-with-nits': '#0f9f9f',
@@ -221,7 +234,7 @@ function pageShell(title, body) {
   return (
     `<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n` +
     `<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n` +
-    `<title>${esc(title)}</title>\n<link rel="stylesheet" href="assets/style.css">\n</head>\n<body>\n${body}\n</body>\n</html>`
+    `<title>${esc(title)}</title>\n<style>\n${INLINE_CSS}\n</style>\n</head>\n<body>\n${body}\n</body>\n</html>`
   );
 }
 
@@ -392,12 +405,7 @@ function main() {
     console.log(`生成 pr-${n}.html`);
   }
   fs.writeFileSync(path.join(OUT, 'index.html'), renderIndex(prs, meta.meta));
-  if (fs.existsSync(ASSET_SRC)) {
-    const assetOut = path.join(OUT, 'assets');
-    fs.mkdirSync(assetOut, { recursive: true });
-    fs.copyFileSync(ASSET_SRC, path.join(assetOut, 'style.css'));
-  }
-  console.log('生成 index.html');
+  console.log('生成 index.html（CSS 已内联，单文件自包含）');
 }
 
 main();
